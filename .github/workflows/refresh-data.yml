@@ -16,7 +16,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run ingest
+      - run: npm run typecheck
+      - run: npm run lint
       - run: npm test
+      - run: npm run build
       - name: Commit verified snapshot
         run: |
           if ! git diff --quiet -- public/data/season.json; then

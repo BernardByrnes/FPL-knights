@@ -40,6 +40,13 @@ const players=[];
 for (const [id,p] of playerMap) { const s=statMap.get(id); if (!s) continue; const team=teamMap.get(number(p.team_code,"team code")); if (!team) throw Error(`Unknown team for ${id}`); const values={}; for (const [key,col] of Object.entries(fields)) values[key]=number(s[col],`${id} ${col}`); if (values.price !== null && (values.price < 3 || values.price > 20)) throw Error(`Unexpected price units for ${id}: ${values.price}`); if (values.minutes !== null && values.minutes < 0) throw Error(`Negative minutes for ${id}`);
  players.push({id,name:p.web_name,fullName:`${p.first_name} ${p.second_name}`.trim(),team:team.short_name,teamCode:number(p.team_code,"team"),position:p.position,...values,weeks:done.flatMap(gw=>{const r=weekly.get(gw).get(id); return r ? [{gw,points:number(r.event_points,"points"),minutes:number(r.minutes,"minutes"),xg:number(r.expected_goals,"xg"),xa:number(r.expected_assists,"xa")}] : [];})}); }
 if (players.length < 100 || statMap.size !== players.length) throw Error(`Incomplete identity join: ${players.length}/${statMap.size}`);
+if (snapshotGameweek === done.at(-1)) {
+ for (const player of players) {
+  if (player.points == null || player.weeks.some(week=>week.points == null || week.minutes == null)) throw Error(`Missing points or minutes for player ${player.id}`);
+  const sum = player.weeks.reduce((total, week)=>total + week.points, 0);
+  if (sum !== player.points) throw Error(`Player ${player.id}: weekly points ${sum} do not match season snapshot ${player.points}`);
+ }
+}
 players.sort((a,b)=>a.id-b.id);
 const output={season,snapshotGameweek,sourceCommit:commit,updatedAt:new Date().toISOString(),completedGameweeks:done,nextGameweek:next?number(next.id,"next"):null,deadline:next?.deadline_time||null,players};
 await mkdir("public/data",{recursive:true});
