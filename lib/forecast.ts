@@ -25,4 +25,4 @@ export function parseForecast(text: string, players: Player[], manual: Record<st
  });
  return {forecast,unmatched,warnings:[...new Set(warnings)],matched:Object.keys(forecast.players).length,rows:parsed.data.length};
 }
-export function coverage(f: Forecast, id: number, start: number) { const weeks=Array.from({length:5},(_,i)=>start+i).filter(w=>w<=38); const entries=weeks.map(w=>f.players[id]?.[w]?.points ?? null); const available=entries.filter((x):x is number=>x!=null); return {total:available.length?available.reduce((a,b)=>a+b,0):null,count:available.length,expected:weeks.length}; }
+export function coverage(f: Forecast, id: number, start: number) { const weeks=Array.from({length:5},(_,i)=>start+i).filter(w=>w<=38); const entries=weeks.map(w=>f.players[id]?.[w]?.points ?? null); const available=entries.filter((x):x is number=>x!=null); return {total:available.length?available.reduce((a,b)=>a+b,0):null,count:available.length,expected:5}; }

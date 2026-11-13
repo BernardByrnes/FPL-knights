@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { mkdir, writeFile, rename, readFile } from "node:fs/promises";
 import Papa from "papaparse";
+import { validateCompleted } from "./validation.mjs";
 const season = "2026-2027";
 const commit = process.env.FPL_SOURCE_COMMIT || execFileSync("git", ["ls-remote", "https://github.com/olbauday/FPL-Core-Insights.git", "refs/heads/main"], {encoding:"utf8"}).trim().split(/\s+/)[0];
 if (!/^[a-f0-9]{40}$/.test(commit)) throw Error("Could not determine upstream commit");
@@ -19,9 +20,12 @@ const unique = (rows, field, label) => { const map = new Map(); for (const row o
 const [people, stats, teams, summaries] = await Promise.all([
  csv("players.csv", ["player_id","web_name","team_code","position"]), csv("playerstats.csv", ["id","now_cost","total_points","minutes","gw"]), csv("teams.csv", ["code","name","short_name"]), csv("gameweek_summaries.csv", ["id","finished","data_checked","is_next","deadline_time"])
 ]);
-const playerMap = unique(people,"player_id","players"); const statMap = unique(stats,"id","stats"); const teamMap = unique(teams,"code","teams"); unique(summaries,"id","summaries");
+const playerMap = unique(people,"player_id","players");
+const snapshotGameweek = Math.max(...stats.map(row => { const gw=number(row.gw,"snapshot gameweek"); if (!Number.isInteger(gw) || gw < 1 || gw > 38) throw Error(`Invalid snapshot gameweek ${gw}`); return gw; }));
+const statMap = unique(stats.filter(row=>number(row.gw,"snapshot gameweek")===snapshotGameweek),"id",`GW${snapshotGameweek} season snapshot`);
+const teamMap = unique(teams,"code","teams"); unique(summaries,"id","summaries");
 const done = summaries.filter(x => x.finished === "True" && x.data_checked === "True").map(x => number(x.id,"gameweek")).sort((a,b)=>a-b);
-if (!done.length || done.some((x,i)=>x !== i+1)) throw Error("Completed gameweeks are absent or non-contiguous; refusing incomplete update");
+validateCompleted(done, snapshotGameweek);
 const next = summaries.find(x=>x.is_next === "True");
 const weekly = new Map();
 for (const gw of done) {
@@ -37,7 +41,7 @@ for (const [id,p] of playerMap) { const s=statMap.get(id); if (!s) continue; con
  players.push({id,name:p.web_name,fullName:`${p.first_name} ${p.second_name}`.trim(),team:team.short_name,teamCode:number(p.team_code,"team"),position:p.position,...values,weeks:done.flatMap(gw=>{const r=weekly.get(gw).get(id); return r ? [{gw,points:number(r.event_points,"points"),minutes:number(r.minutes,"minutes"),xg:number(r.expected_goals,"xg"),xa:number(r.expected_assists,"xa")}] : [];})}); }
 if (players.length < 100 || statMap.size !== players.length) throw Error(`Incomplete identity join: ${players.length}/${statMap.size}`);
 players.sort((a,b)=>a.id-b.id);
-const output={season,sourceCommit:commit,updatedAt:new Date().toISOString(),completedGameweeks:done,nextGameweek:next?number(next.id,"next"):null,deadline:next?.deadline_time||null,players};
+const output={season,snapshotGameweek,sourceCommit:commit,updatedAt:new Date().toISOString(),completedGameweeks:done,nextGameweek:next?number(next.id,"next"):null,deadline:next?.deadline_time||null,players};
 await mkdir("public/data",{recursive:true});
 // Do not churn the dataset when the upstream commit is unchanged.
 try { const previous=JSON.parse(await readFile("public/data/season.json","utf8")); if(previous.sourceCommit===commit) { console.log("Already current; preserving original update timestamp"); process.exit(0); } } catch {}
