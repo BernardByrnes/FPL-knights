@@ -22,14 +22,7 @@ await page.getByRole("button",{name:"Compare players"}).click();
 for(const p of [first,second]) { await page.getByLabel("Search players to compare").fill(p.name); await page.locator(".search-results button").filter({hasText:p.name}).first().click(); }
 await page.getByRole("heading",{name:"The numbers, side by side"}).waitFor();
 await page.getByRole("heading",{name:"Points per £million"}).waitFor();
-const sent=[]; page.on("request",request=>{if(request.method()!=="GET")sent.push(`${request.method()} ${request.url()}`)});
-await page.getByRole("button",{name:"Import projections"}).click();
-const csv=`id,11_pts,12_pts,13_pts,14_pts,15_pts\n${first.id},1,2,3,4,5\n${second.id},2,3,4,5,6\n`;
-await page.locator('input[type="file"]').setInputFiles({name:"synthetic.csv",mimeType:"text/csv",buffer:Buffer.from(csv)});
-await page.getByText("2 of 2 players matched").waitFor();
-await page.getByRole("button",{name:"Confirm import"}).click();
-await page.getByRole("heading",{name:"Looking ahead"}).waitFor();
-if(sent.length) throw Error(`Unexpected non-GET requests during import: ${sent.join(", ")}`);
+if(await page.getByRole("button",{name:"Import projections"}).count()) throw Error("Import button must be removed");
 await page.waitForTimeout(350);
 await page.screenshot({path:"artifacts/comparison-desktop.png",fullPage:true});
 await page.setViewportSize({width:390,height:844});
@@ -37,8 +30,10 @@ await page.reload({waitUntil:"networkidle"});
 await page.getByRole("heading",{name:"The bigger picture."}).waitFor();
 await page.waitForTimeout(350);
 await page.screenshot({path:"artifacts/dashboard-mobile.png",fullPage:true});
-await page.getByRole("button",{name:"Toggle navigation"}).click();
-await page.getByRole("button",{name:"Compare players"}).click();
+await page.locator(".mobile-nav").getByRole("button",{name:"Players",exact:true}).click();
+await page.getByLabel("Search players",{exact:true}).fill(first.name);
+await page.screenshot({path:"artifacts/players-mobile.png",fullPage:true});
+await page.locator(".mobile-nav").getByRole("button",{name:"Compare",exact:true}).click();
 for(const p of selected) { await page.getByLabel("Search players to compare").fill(p.name); await page.locator(".search-results button").filter({hasText:p.name}).first().click(); }
 await page.getByRole("heading",{name:"The numbers, side by side"}).waitFor();
 await page.waitForTimeout(350);
@@ -47,5 +42,5 @@ if(overflow.width>overflow.viewport) throw Error(`Mobile horizontal overflow: ${
 await page.waitForTimeout(350);
 await page.screenshot({path:"artifacts/comparison-mobile.png",fullPage:true});
 if(errors.length) throw Error(`Browser errors: ${errors.join("; ")}`);
-console.log(`Browser QA passed with ${first.name} and ${second.name}; synthetic local forecast, no non-GET import requests.`);
+console.log(`Browser QA passed with ${first.name} and ${second.name}; responsive cards, bottom navigation, no import button.`);
 await browser.close();
