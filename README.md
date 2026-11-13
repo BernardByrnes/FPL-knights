@@ -28,3 +28,7 @@ Supported columns are `X_pts`, or the extra-column export's `X_with_prob`, `X_pt
 ## Scope and limitations
 
 This MVP has no account, backend upload, recommendation engine or automated FPL Form access. Upcoming fixtures are unavailable until the source provides a reliably identifiable future Premier League schedule. Historical snapshots may be stale if upstream refresh fails; use the visible timestamp and commit link. Team and positional filters are in the player explorer; source data may contain missing values shown as dashes. Forecast data disappears on reload by design.
+
+## Verified workflow run
+
+The first successful manual refresh was [run 43499043623](https://github.com/BernardByrnes/FPL-knights/actions/runs/43499043623) on 13 November 2026, at commit `c719f57`. It passed `npm ci`, ingestion, typecheck, lint, unit tests and the production build. The earlier [lockfile bootstrap run](https://github.com/BernardByrnes/FPL-knights/actions/runs/43498206501) also successfully committed the lockfile with the Actions token. Enable GitHub Actions and allow the workflow token to write repository contents; branch protection rules must also permit the refresh bot to push, or the refresh commit step will fail. You can launch **Refresh FPL data → Run workflow** from the Actions tab. Scheduled runs use GitHub's UTC cron schedule and may start later than the stated time.
