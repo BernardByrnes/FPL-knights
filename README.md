@@ -34,3 +34,9 @@ This MVP has no account, backend upload, recommendation engine or automated FPL 
 The first successful manual refresh was [run 43499043623](https://github.com/BernardByrnes/FPL-knights/actions/runs/43499043623) on 13 November 2026, at commit `c719f57`. It passed `npm ci`, ingestion, typecheck, lint, unit tests and the production build. The earlier [lockfile bootstrap run](https://github.com/BernardByrnes/FPL-knights/actions/runs/43498206501) also successfully committed the lockfile with the Actions token. Enable GitHub Actions and allow the workflow token to write repository contents; branch protection rules must also permit the refresh bot to push, or the refresh commit step will fail. You can launch **Refresh FPL data → Run workflow** from the Actions tab. Scheduled runs use GitHub's UTC cron schedule and may start later than the stated time.
 
 The manual **Browser QA** workflow exercises desktop and mobile navigation, player details, four-player comparison and the absence of an import button. Screenshots are retained as a workflow artifact; the test uses real player IDs but no FPL Form forecast data.
+
+## Security boundaries
+
+Player statistics and frontend JavaScript are public, visible in browser developer tools, and present in this public repository. Do not place credentials, private forecasts, or personal information in public files or client component props. There are currently no user accounts, database, or public data-writing endpoints. The local development server binds to 127.0.0.1; production hosting must run a production build with HTTPS, rather than expose `next dev`.
+
+Browser headers prevent framing, disable MIME sniffing and sensitive device permissions, and restrict object embeds and form destinations. Production browser source maps are disabled. This is baseline hardening, not a penetration-test certification; dependencies and hosting settings still need ongoing security maintenance.
