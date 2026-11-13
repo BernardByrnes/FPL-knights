@@ -10,6 +10,9 @@ const page=await browser.newPage({viewport:{width:1440,height:1000}});
 const errors=[]; page.on("pageerror",e=>errors.push(e.message));
 await page.goto("http://127.0.0.1:3000",{waitUntil:"networkidle"});
 await page.getByRole("heading",{name:"The bigger picture."}).waitFor();
+if(await page.locator(".category-ranking").count()!==6) throw Error("Expected six category leaderboards");
+for(const category of await page.locator(".category-ranking").all()) {if(await category.locator("li").count()!==6) throw Error("Each category must display six ranked players");}
+
 await page.waitForTimeout(350);
 await page.screenshot({path:"artifacts/dashboard-desktop.png",fullPage:true});
 await page.getByRole("button",{name:"Player explorer"}).click();
