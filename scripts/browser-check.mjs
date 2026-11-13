@@ -25,22 +25,20 @@ await page.locator(".player-table-row button").first().click();
 await page.getByRole("dialog").getByText(first.fullName).waitFor();
 await page.getByRole("dialog").getByRole("button",{name:"Close"}).click();
 await page.getByRole("button",{name:"Compare players"}).click();
-await page.getByLabel("Comparison position",{exact:true}).selectOption(first.position);
-await page.getByLabel("Comparison club",{exact:true}).selectOption(first.team);
-await page.getByLabel("Max price (£m)",{exact:true}).fill(String(first.price));
-await page.getByLabel("Min minutes",{exact:true}).fill(String(first.minutes));
-const filteredButtons=await page.locator(".candidate-results button").allTextContents();
-if(!filteredButtons.length || filteredButtons.some(text=>!text.includes(first.team))) throw Error("Comparison club filter failed");
-await page.getByLabel("Max price (£m)",{exact:true}).fill("0");
-await page.getByText("No players match these filters. Try widening your price range or lowering a minimum.").waitFor();
-await page.getByRole("button",{name:"Reset filters",exact:true}).click();
-
-for(const p of [first,second]) { await page.getByLabel("Search players to compare").fill(p.name); await page.locator(".search-results button").filter({hasText:p.name}).first().click(); }
+if(await page.locator(".metric-picker").count()) throw Error("Statistics controls must wait for a player");
+for(const p of [first,second]) { await page.getByLabel("Search players to compare").fill(p.name); await page.locator(".search-results button").filter({hasText:p.name}).first().click(); await page.getByText("Choose statistics to compare",{exact:true}).waitFor(); }
 await page.getByRole("heading",{name:"The numbers, side by side"}).waitFor();
-await page.getByLabel("Max price (£m)",{exact:true}).fill("0");
-if(await page.locator(".selection:not(.vacant)").count()!==2) throw Error("Filters must not remove selected players");
-await page.getByRole("button",{name:"Reset filters",exact:true}).click();
-
+await page.getByRole("button",{name:"Clear statistics",exact:true}).click();
+await page.getByLabel("Expected goals (xG)",{exact:true}).check();
+await page.getByLabel("Price",{exact:true}).check();
+if(await page.locator("tbody tr").count()!==2) throw Error("Only chosen statistics should be displayed");
+for(const key of ["xg","price"]){
+ const row=page.locator(`tr[data-metric="${key}"]`);
+ const values=await row.locator("td[data-player-id]").evaluateAll(cells=>cells.map(c=>({id:Number(c.getAttribute("data-player-id")),value:Number(c.querySelector("span").textContent.replace(/[£m]/g,"")),best:c.classList.contains("best-metric")})));
+ const best=(key==="price"?Math.min:Math.max)(...values.map(v=>v.value));
+ if(values.some(v=>v.best!==(v.value===best))) throw Error(`Wrong ${key} highlight`);
+}
+await page.getByRole("button",{name:"Select all",exact:true}).click();
 await page.getByRole("heading",{name:"Points per £million"}).waitFor();
 if(await page.getByRole("button",{name:"Import projections"}).count()) throw Error("Import button must be removed");
 await page.waitForTimeout(350);
