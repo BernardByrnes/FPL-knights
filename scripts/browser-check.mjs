@@ -8,6 +8,7 @@ const browser=await chromium.launch({headless:true});
 await mkdir("artifacts",{recursive:true});
 const page=await browser.newPage({viewport:{width:1440,height:1000}});
 const errors=[]; page.on("pageerror",e=>errors.push(e.message));
+page.on("console",message=>{if(message.type()==="error" && /hydration|whitespace text nodes|cannot be a child|cannot be a descendant/i.test(message.text())) errors.push(message.text());});
 const response=await page.goto("http://127.0.0.1:3000",{waitUntil:"networkidle"});
 const headers=response.headers();
 if(headers["x-content-type-options"]!=="nosniff" || headers["x-frame-options"]!=="DENY") throw Error("Missing browser security headers");
@@ -28,6 +29,8 @@ await page.getByRole("button",{name:"Compare players"}).click();
 if(await page.locator(".metric-picker").count()) throw Error("Statistics controls must wait for a player");
 for(const p of [first,second]) { await page.getByLabel("Search players to compare").fill(p.name); await page.locator(".search-results button").filter({hasText:p.name}).first().click(); await page.getByText("Choose statistics to compare",{exact:true}).waitFor(); }
 await page.getByRole("heading",{name:"The numbers, side by side"}).waitFor();
+if(await page.locator(".comparison tr").evaluateAll(rows=>rows.some(row=>Array.from(row.childNodes).some(node=>node.nodeType===3)))) throw Error("Comparison rows must not contain whitespace text nodes");
+
 await page.getByRole("button",{name:"Clear statistics",exact:true}).click();
 await page.getByLabel("Expected goals (xG)",{exact:true}).check();
 await page.getByLabel("Price",{exact:true}).check();
@@ -54,6 +57,8 @@ await page.screenshot({path:"artifacts/players-mobile.png",fullPage:true});
 await page.locator(".mobile-nav").getByRole("button",{name:"Compare",exact:true}).click();
 for(const p of selected) { await page.getByLabel("Search players to compare").fill(p.name); await page.locator(".search-results button").filter({hasText:p.name}).first().click(); }
 await page.getByRole("heading",{name:"The numbers, side by side"}).waitFor();
+if(await page.locator(".comparison tr").evaluateAll(rows=>rows.some(row=>Array.from(row.childNodes).some(node=>node.nodeType===3)))) throw Error("Comparison rows must not contain whitespace text nodes");
+
 await page.waitForTimeout(350);
 const overflow=await page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:innerWidth}));
 if(overflow.width>overflow.viewport) throw Error(`Mobile horizontal overflow: ${JSON.stringify(overflow)}`);
