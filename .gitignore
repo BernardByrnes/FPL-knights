@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+players.csv
+playerstats.csv
+teams.csv
+summaries.csv
+gw1.csv
+fixtures1.csv

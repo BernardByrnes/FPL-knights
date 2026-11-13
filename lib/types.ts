@@ -1,0 +1,4 @@
+export type Week = { gw: number; points: number | null; minutes: number | null; xg: number | null; xa: number | null };
+export type Player = { id: number; name: string; fullName: string; team: string; teamCode: number; position: string; price: number | null; points: number | null; minutes: number | null; starts: number | null; goals: number | null; assists: number | null; xg: number | null; xa: number | null; xgi: number | null; cleanSheets: number | null; defensive: number | null; form: number | null; ppg: number | null; weeks: Week[] };
+export type Dataset = { season: string; sourceCommit: string; updatedAt: string; completedGameweeks: number[]; nextGameweek: number | null; deadline: string | null; players: Player[] };
+export type Forecast = { source: string; gameweeks: number[]; players: Record<number, Record<number, { points: number | null; probability: number | null }>> };
