@@ -32,3 +32,5 @@ This MVP has no account, backend upload, recommendation engine or automated FPL 
 ## Verified workflow run
 
 The first successful manual refresh was [run 43499043623](https://github.com/BernardByrnes/FPL-knights/actions/runs/43499043623) on 13 November 2026, at commit `c719f57`. It passed `npm ci`, ingestion, typecheck, lint, unit tests and the production build. The earlier [lockfile bootstrap run](https://github.com/BernardByrnes/FPL-knights/actions/runs/43498206501) also successfully committed the lockfile with the Actions token. Enable GitHub Actions and allow the workflow token to write repository contents; branch protection rules must also permit the refresh bot to push, or the refresh commit step will fail. You can launch **Refresh FPL data → Run workflow** from the Actions tab. Scheduled runs use GitHub's UTC cron schedule and may start later than the stated time.
+
+The manual **Browser QA** workflow exercises desktop and mobile navigation, player details, four-player comparison and a synthetic forecast import. Screenshots are retained as a workflow artifact; the test uses real player IDs but no FPL Form forecast data.

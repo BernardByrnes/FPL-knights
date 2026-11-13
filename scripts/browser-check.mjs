@@ -21,6 +21,7 @@ await page.getByRole("dialog").getByRole("button",{name:"Close"}).click();
 await page.getByRole("button",{name:"Compare players"}).click();
 for(const p of [first,second]) { await page.getByLabel("Search players to compare").fill(p.name); await page.locator(".search-results button").filter({hasText:p.name}).first().click(); }
 await page.getByRole("heading",{name:"The numbers, side by side"}).waitFor();
+await page.getByRole("heading",{name:"Points per £million"}).waitFor();
 const sent=[]; page.on("request",request=>{if(request.method()!=="GET")sent.push(`${request.method()} ${request.url()}`)});
 await page.getByRole("button",{name:"Import projections"}).click();
 const csv=`id,11_pts,12_pts,13_pts,14_pts,15_pts\n${first.id},1,2,3,4,5\n${second.id},2,3,4,5,6\n`;
