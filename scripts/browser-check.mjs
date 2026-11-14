@@ -43,7 +43,24 @@ if((await page.locator('tr[data-metric="projectedPoints"] td[data-player-id] spa
 await page.getByRole("button",{name:`Remove ${forecastName}`,exact:true}).click();
 
 await page.getByRole("button",{name:"Player explorer"}).click();
+const pagination=page.getByRole("navigation",{name:"Player pagination top",exact:true});
+if(await page.locator(".player-table-row").count()!==25)throw Error("Expected 25 players per page");
+const firstPageName=await page.locator(".player-table-row button").first().textContent();
+await pagination.getByRole("button",{name:"Next",exact:true}).click();
+if(await page.locator(".player-table-row button").first().textContent()===firstPageName)throw Error("Next player page did not change results");
+await page.getByLabel("Players per page",{exact:true}).selectOption("10");
+if(await page.locator(".player-table-row").count()!==10)throw Error("Page size did not update");
+await pagination.getByRole("button",{name:"Next",exact:true}).click();
+const pageJump=page.getByLabel("Go to player page",{exact:true});
+const lastPage=await pageJump.locator("option").last().getAttribute("value");
+await pageJump.selectOption(lastPage);
+if(!(await pagination.getByRole("button",{name:"Next",exact:true}).isDisabled()))throw Error("Last page should disable Next");
+await page.getByLabel("Search players",{exact:true}).fill("zzzz-no-matching-player");
+if(await page.locator(".player-table-row").count()!==0 || !(await pagination.getByRole("button",{name:"Next",exact:true}).isDisabled()))throw Error("Empty pagination state failed");
+
 await page.getByLabel("Search players",{exact:true}).fill(first.name);
+if(!(await page.getByRole("navigation",{name:"Player pagination top",exact:true}).getByRole("button",{name:"Previous",exact:true}).isDisabled()))throw Error("Search did not reset pagination");
+
 await page.locator(".player-table-row").first().waitFor();
 await page.locator(".player-table-row button").first().click();
 await page.getByRole("dialog").getByText(first.fullName).waitFor();
