@@ -32,6 +32,7 @@ if(await page.locator(".projection-row").first().locator(".projection-weeks>div"
 await page.getByLabel("Search projections").fill("Raya");
 await page.locator(".projection-row").first().waitFor();
 await checkNoSourceReferences();
+await page.waitForTimeout(200);
 await page.screenshot({path:"artifacts/projections-desktop.png",fullPage:true});
 const forecastRow=page.locator(".projection-row").first();
 const forecastName=await forecastRow.locator(".projection-player>strong").textContent();
