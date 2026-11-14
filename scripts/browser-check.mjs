@@ -9,7 +9,7 @@ await mkdir("artifacts",{recursive:true});
 const page=await browser.newPage({viewport:{width:1440,height:1000}});
 async function checkNoSourceReferences(){
  if(await page.locator('a[href*="github.com"],a[href$=".csv"]').count())throw Error("Provider or CSV access link remains in frontend");
- const text=await page.locator("body").innerText();if(/FPL Optimized|FPL Core Insights|source CSV/i.test(text))throw Error("Provider reference remains visible");
+ const text=await page.locator("body").innerText();if(/\bUTC\b/.test(text))throw Error("Website timestamps must use EAT");if(/FPL Optimized|FPL Core Insights|source CSV/i.test(text))throw Error("Provider reference remains visible");
 }
 const errors=[]; page.on("pageerror",e=>errors.push(e.message));
 page.on("console",message=>{if(message.type()==="error" && /hydration|whitespace text nodes|cannot be a child|cannot be a descendant/i.test(message.text())) errors.push(message.text());});
