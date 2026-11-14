@@ -1,7 +1,10 @@
 import type { Player } from "./types";
 import { money, per90, value } from "./metrics";
-type ComparisonMetric = {key:string;label:string;get:(p:Player)=>number|null;direction:"higher"|"lower";digits:number;format?:(value:number|null)=>string;help?:string};
+export type ComparisonMetric = {key:string;label:string;get:(p:Player)=>number|null;direction:"higher"|"lower";digits:number;format?:(value:number|null)=>string;help?:string};
 export const comparisonMetrics:ComparisonMetric[] = [
+ {key:"projectedPoints",label:"Next 5 GW projected points",get:p=>p.projectedPoints??null,direction:"higher",digits:2,help:"Forecast total across the displayed upcoming window; unavailable if any gameweek is missing."},
+ {key:"projectedMinutes",label:"Next 5 GW expected minutes",get:p=>p.projectedMinutes??null,direction:"higher",digits:1},
+ {key:"projectionValue",label:"Projected points per £m",get:p=>p.projectionValue??null,direction:"higher",digits:2},
  {key:"price",label:"Price",get:p=>p.price,direction:"lower",digits:1,format:money},
  {key:"points",label:"Total points",get:p=>p.points,direction:"higher",digits:0},
  {key:"ppg",label:"Points per game",get:p=>p.ppg,direction:"higher",digits:2},

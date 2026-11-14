@@ -19,6 +19,13 @@ for(const category of await page.locator(".category-ranking").all()) {if(await c
 
 await page.waitForTimeout(350);
 await page.screenshot({path:"artifacts/dashboard-desktop.png",fullPage:true});
+await page.getByRole("button",{name:"Projections",exact:true}).click();
+await page.getByRole("heading",{name:"Look five weeks ahead."}).waitFor();
+await page.locator(".projection-row").first().waitFor();
+if(await page.locator(".projection-row").first().locator(".projection-weeks>div").count()!==5)throw Error("Expected five forecast gameweeks");
+await page.getByLabel("Search projections").fill("Raya");
+await page.locator(".projection-row").first().waitFor();
+await page.screenshot({path:"artifacts/projections-desktop.png",fullPage:true});
 await page.getByRole("button",{name:"Player explorer"}).click();
 await page.getByLabel("Search players",{exact:true}).fill(first.name);
 await page.locator(".player-table-row").first().waitFor();
@@ -51,6 +58,11 @@ await page.reload({waitUntil:"networkidle"});
 await page.getByRole("heading",{name:"The bigger picture."}).waitFor();
 await page.waitForTimeout(350);
 await page.screenshot({path:"artifacts/dashboard-mobile.png",fullPage:true});
+await page.locator(".mobile-nav").getByRole("button",{name:"Projections",exact:true}).click();
+await page.locator(".projection-row").first().waitFor();
+await page.getByLabel("Search projections").fill("Raya");
+if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error("Projection mobile overflow");
+await page.screenshot({path:"artifacts/projections-mobile.png",fullPage:true});
 await page.locator(".mobile-nav").getByRole("button",{name:"Players",exact:true}).click();
 await page.getByLabel("Search players",{exact:true}).fill(first.name);
 await page.screenshot({path:"artifacts/players-mobile.png",fullPage:true});
