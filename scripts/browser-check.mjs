@@ -7,6 +7,10 @@ const [first,second]=selected;
 const browser=await chromium.launch({headless:true});
 await mkdir("artifacts",{recursive:true});
 const page=await browser.newPage({viewport:{width:1440,height:1000}});
+async function checkNoSourceReferences(){
+ if(await page.locator('a[href*="github.com"],a[href$=".csv"]').count())throw Error("Provider or CSV access link remains in frontend");
+ const text=await page.locator("body").innerText();if(/FPL Optimized|FPL Core Insights|source CSV/i.test(text))throw Error("Provider reference remains visible");
+}
 const errors=[]; page.on("pageerror",e=>errors.push(e.message));
 page.on("console",message=>{if(message.type()==="error" && /hydration|whitespace text nodes|cannot be a child|cannot be a descendant/i.test(message.text())) errors.push(message.text());});
 const response=await page.goto("http://127.0.0.1:3000",{waitUntil:"networkidle"});
@@ -18,6 +22,7 @@ if(await page.locator(".category-ranking").count()!==6) throw Error("Expected si
 for(const category of await page.locator(".category-ranking").all()) {if(await category.locator("li").count()!==6) throw Error("Each category must display six ranked players");}
 
 await page.waitForTimeout(350);
+await checkNoSourceReferences();
 await page.screenshot({path:"artifacts/dashboard-desktop.png",fullPage:true});
 await page.getByRole("button",{name:"Projections",exact:true}).click();
 await page.getByRole("heading",{name:"Look five weeks ahead."}).waitFor();
@@ -25,6 +30,7 @@ await page.locator(".projection-row").first().waitFor();
 if(await page.locator(".projection-row").first().locator(".projection-weeks>div").count()!==5)throw Error("Expected five forecast gameweeks");
 await page.getByLabel("Search projections").fill("Raya");
 await page.locator(".projection-row").first().waitFor();
+await checkNoSourceReferences();
 await page.screenshot({path:"artifacts/projections-desktop.png",fullPage:true});
 const forecastRow=page.locator(".projection-row").first();
 const forecastName=await forecastRow.locator(".projection-player>strong").textContent();
@@ -67,6 +73,7 @@ if(projectedValues.some(v=>v.best!==(v.value===projectedBest)))throw Error("Wron
 await page.getByRole("heading",{name:"Points per £million"}).waitFor();
 if(await page.getByRole("button",{name:"Import projections"}).count()) throw Error("Import button must be removed");
 await page.waitForTimeout(350);
+await checkNoSourceReferences();
 await page.screenshot({path:"artifacts/comparison-desktop.png",fullPage:true});
 await page.setViewportSize({width:390,height:844});
 await page.reload({waitUntil:"networkidle"});

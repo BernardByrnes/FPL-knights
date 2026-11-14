@@ -5,3 +5,6 @@ export type Forecast = { source: string; gameweeks: number[]; players: Record<nu
 
 export type ProjectionRow = {id:number;name:string;team:string;position:string;buyPrice:number|null;sellPrice:number|null;weeks:Record<number,{points:number|null;minutes:number|null}>};
 export type Projections = {gameweeks:number[];sourceCommit:string;sourceUpdatedAt:string;sourceUrl:string;rows:ProjectionRow[]};
+
+export type DatasetView = Omit<Dataset,"sourceCommit">;
+export type ProjectionView = {gameweeks:number[];updatedAt:string;rows:Pick<ProjectionRow,"id"|"weeks">[]};

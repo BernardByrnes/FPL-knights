@@ -10,6 +10,6 @@ export function parseProjections(csv:string,start:number):{gameweeks:number[];ro
  const ids=new Set<number>();const rows=parsed.data.map(r=>{const id=Number(r.ID);if(!Number.isInteger(id)||id<=0||ids.has(id))throw Error("Invalid or duplicate projection ID");ids.add(id);return {id,name:r.Name,team:r.Team,position:r.Pos,buyPrice:numeric(r.BV,0,25),sellPrice:numeric(r.SV,0,25),weeks:Object.fromEntries(gameweeks.map(g=>[g,{points:numeric(r[`${g}_Pts`],-20,100),minutes:numeric(r[`${g}_xMins`],0,270)}]))}});
  if(!rows.length)throw Error("Empty projections CSV");return {gameweeks,rows};
 }
-export function projectionTotal(row:ProjectionRow|undefined,weeks:number[],key:"points"|"minutes"):number|null{
+export function projectionTotal(row:Pick<ProjectionRow,"weeks">|undefined,weeks:number[],key:"points"|"minutes"):number|null{
  if(!row||!weeks.length)return null;const values=weeks.map(g=>row.weeks[g]?.[key]);return values.every((v):v is number=>v!=null&&Number.isFinite(v))?values.reduce((a,b)=>a+b,0):null;
 }
