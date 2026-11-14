@@ -27,13 +27,14 @@ await page.getByLabel("Search projections").fill("Raya");
 await page.locator(".projection-row").first().waitFor();
 await page.screenshot({path:"artifacts/projections-desktop.png",fullPage:true});
 const forecastRow=page.locator(".projection-row").first();
+const forecastName=await forecastRow.locator(".projection-player>strong").textContent();
 const weekly=await forecastRow.locator(".projection-weeks b").allTextContents();
 const total=Number(await forecastRow.locator(".projection-total b").textContent());
 if(Math.abs(weekly.reduce((sum,v)=>sum+Number(v),0)-total)>.011)throw Error("Five-week forecast total does not match weekly values");
 await forecastRow.getByRole("button",{name:"Compare +",exact:true}).click();
 await page.locator('tr[data-metric="projectedPoints"]').waitFor();
 if((await page.locator('tr[data-metric="projectedPoints"] td[data-player-id] span').first().textContent())==="—")throw Error("Selected player forecast was not joined");
-await page.getByRole("button",{name:"Remove Raya",exact:true}).click();
+await page.getByRole("button",{name:`Remove ${forecastName}`,exact:true}).click();
 
 await page.getByRole("button",{name:"Player explorer"}).click();
 await page.getByLabel("Search players",{exact:true}).fill(first.name);
