@@ -26,6 +26,15 @@ if(await page.locator(".projection-row").first().locator(".projection-weeks>div"
 await page.getByLabel("Search projections").fill("Raya");
 await page.locator(".projection-row").first().waitFor();
 await page.screenshot({path:"artifacts/projections-desktop.png",fullPage:true});
+const forecastRow=page.locator(".projection-row").first();
+const weekly=await forecastRow.locator(".projection-weeks b").allTextContents();
+const total=Number(await forecastRow.locator(".projection-total b").textContent());
+if(Math.abs(weekly.reduce((sum,v)=>sum+Number(v),0)-total)>.011)throw Error("Five-week forecast total does not match weekly values");
+await forecastRow.getByRole("button",{name:"Compare +",exact:true}).click();
+await page.locator('tr[data-metric="projectedPoints"]').waitFor();
+if((await page.locator('tr[data-metric="projectedPoints"] td[data-player-id] span').first().textContent())==="—")throw Error("Selected player forecast was not joined");
+await page.getByRole("button",{name:"Remove Raya",exact:true}).click();
+
 await page.getByRole("button",{name:"Player explorer"}).click();
 await page.getByLabel("Search players",{exact:true}).fill(first.name);
 await page.locator(".player-table-row").first().waitFor();
@@ -49,6 +58,11 @@ for(const key of ["xg","price"]){
  if(values.some(v=>v.best!==(v.value===best))) throw Error(`Wrong ${key} highlight`);
 }
 await page.getByRole("button",{name:"Select all",exact:true}).click();
+const projectedValues=await page.locator('tr[data-metric="projectedPoints"] td[data-player-id]').evaluateAll(cells=>cells.map(c=>({value:Number(c.querySelector("span").textContent),best:c.classList.contains("best-metric")})));
+if(projectedValues.length!==2||projectedValues.some(v=>!Number.isFinite(v.value)))throw Error("Five-week comparison values missing");
+const projectedBest=Math.max(...projectedValues.map(v=>v.value));
+if(projectedValues.some(v=>v.best!==(v.value===projectedBest)))throw Error("Wrong projected points winner");
+
 await page.getByRole("heading",{name:"Points per £million"}).waitFor();
 if(await page.getByRole("button",{name:"Import projections"}).count()) throw Error("Import button must be removed");
 await page.waitForTimeout(350);

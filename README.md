@@ -1,6 +1,6 @@
 # FPL Knights
 
-An independent Fantasy Premier League analytics MVP. Season data is observed FPL Core Insights data; imported FPL Form numbers are forecasts and stay in your browser's memory.
+An independent Fantasy Premier League analytics MVP. Season data is observed FPL Core Insights data; FPL Optimized projections are forecasts loaded automatically by the server.
 
 ## Run locally
 
