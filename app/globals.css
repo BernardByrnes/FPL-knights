@@ -32,7 +32,9 @@ select{background:#1a222e;border:1px solid #3b4b60;border-radius:5px;padding:9px
 .squad-heading{margin-bottom:16px}
 .squad-totals{justify-content:flex-end;text-align:right}
 .squad-totals b,.squad-totals small{display:block}
-.squad-totals b{font-size:16px;font-variant-numeric:tabular-nums}
+.squad-heading .squad-gameweek,.squad-subtitle,.squad-totals b{font-size:16px;font-weight:700;line-height:1.35;letter-spacing:normal}
+.squad-totals b{font-variant-numeric:tabular-nums}
+.squad-subtitle{margin-top:3px}
 .squad-totals small{color:var(--muted);font-size:10px}
 .pitch{position:relative;isolation:isolate;padding:14px 8px;background:repeating-linear-gradient(#1b3b37 0 25%,#20443e 25% 50%);border:1px solid #47675d;border-radius:6px}
 .pitch::before{content:"";position:absolute;inset:6px;z-index:-1;border:1px solid #a9c7b44d;border-radius:2px;pointer-events:none;background:linear-gradient(transparent calc(50% - .5px),#a9c7b44d 50%,transparent calc(50% + .5px))}
@@ -104,12 +106,9 @@ select{background:#1a222e;border:1px solid #3b4b60;border-radius:5px;padding:9px
  .projection-weeks span.projection-opponent{white-space:normal}
 }
 
-.squad-heading .squad-gameweek{font-size:clamp(28px,3vw,38px);line-height:1.08;letter-spacing:-.04em}
-.squad-subtitle{font-size:13px;color:var(--muted);margin-top:6px}
 .scoring-trends .panel-head{align-items:flex-start;flex-wrap:wrap;gap:12px}
 .trend-filter{display:grid;gap:4px;color:var(--muted);font-size:11px}
 @media(max-width:700px){
- .squad-heading .squad-gameweek{font-size:30px}
  .overview-grid>.scoring-trends .chart{height:275px}
  .trend-filter select{min-height:44px}
 }
