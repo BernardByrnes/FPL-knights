@@ -25,6 +25,24 @@ for(const category of await page.locator(".category-ranking").all()) {if(await c
 await page.waitForTimeout(350);
 await checkNoSourceReferences();
 await page.screenshot({path:"artifacts/dashboard-desktop.png",fullPage:true});
+await page.getByRole("heading",{name:/projected squad/i}).waitFor();
+if(await page.locator(".pitch .pitch-player").count()!==11 ||
+   await page.locator(".squad-bench .pitch-player").count()!==4 ||
+   await page.locator(".pitch-player .kit").count()!==15) throw Error("Expected eleven starters and four bench kits");
+const squadCost=Number((await page.locator(".squad-totals b").last().textContent()).replace(/[^0-9.]/g,""));
+if(squadCost>101||squadCost<=0)throw Error("Squad exceeds its £101m budget");
+await page.getByRole("button",{name:"Open Transfer Finder",exact:true}).click();
+await page.getByLabel("Player to replace").fill("Raya");
+await page.locator(".transfer-panel .search-results button").filter({hasText:/^Raya\s*ARS/}).first().click();
+await page.getByText("Hold current player",{exact:false}).waitFor();
+await page.getByLabel("Max budget (£m)",{exact:true}).fill("15");
+await page.getByLabel("Forecast window").selectOption("3");
+const transferResult=page.locator(".transfer-result").nth(1);
+await transferResult.waitFor();
+if(await transferResult.locator(".transfer-fixtures small").count()!==3)throw Error("Transfer fixtures do not match the selected forecast window");
+await transferResult.getByRole("button",{name:"Compare",exact:true}).click();
+if(await page.locator(".selection:not(.vacant)").count()!==2)throw Error("Transfer comparison did not select both players");
+for(const button of await page.getByRole("button",{name:/^Remove /}).all().then(items=>items.reverse()))await button.click();
 await page.getByRole("button",{name:"Projections",exact:true}).click();
 await page.getByRole("heading",{name:"Points projections"}).waitFor();
 await page.locator(".projection-row").first().waitFor();
@@ -99,6 +117,8 @@ await page.setViewportSize({width:390,height:844});
 await page.reload({waitUntil:"networkidle"});
 await page.getByRole("heading",{name:"Season overview"}).waitFor();
 await page.waitForTimeout(350);
+if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error("Dashboard mobile overflow");
+await page.screenshot({path:"artifacts/squad-mobile.png",fullPage:false});
 await page.screenshot({path:"artifacts/dashboard-mobile.png",fullPage:true});
 await page.locator(".mobile-nav").getByRole("button",{name:"Projections",exact:true}).click();
 await page.locator(".projection-row").first().waitFor();

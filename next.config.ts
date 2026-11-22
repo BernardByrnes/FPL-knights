@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 const config: NextConfig = {
  devIndicators:false,
+ serverExternalPackages:["highs"],
+ outputFileTracingIncludes:{"/":["./node_modules/highs/build/*.wasm"]},
  poweredByHeader:false,
  productionBrowserSourceMaps:false,
  async headers(){return [{source:"/:path*",headers:[

@@ -27,6 +27,23 @@ const teamMap = unique(teams,"code","teams"); unique(summaries,"id","summaries")
 const done = summaries.filter(x => x.finished === "True" && x.data_checked === "True").map(x => number(x.id,"gameweek")).sort((a,b)=>a-b);
 validateCompleted(done, snapshotGameweek);
 const next = summaries.find(x=>x.is_next === "True");
+const upcoming = next ? number(next.id, "next gameweek") : null;
+const fixtures = (await Promise.all(
+ Array.from({length: upcoming ? Math.min(5, 39 - upcoming) : 0}, (_, index) => upcoming + index).map(async gw => {
+  try {
+   const rows = await csv(`By Gameweek/GW${gw}/fixtures.csv`, ["gameweek","tournament","home_team","away_team"]);
+   return rows.filter(row => row.tournament === "prem" && Number(row.gameweek) === gw).map(row => {
+    const home = teamMap.get(Number(row.home_team))?.short_name;
+    const away = teamMap.get(Number(row.away_team))?.short_name;
+    if (!home || !away || home === away) throw Error(`Invalid fixture team in GW${gw}`);
+    return {gw,home,away};
+   });
+  } catch (error) {
+   console.warn(`Upcoming GW${gw} fixtures unavailable: ${error.message}`);
+   return [];
+  }
+ })
+)).flat();
 const weekly = new Map();
 for (const gw of done) {
  const [rows,fixtures] = await Promise.all([csv(`By Gameweek/GW${gw}/player_gameweek_stats.csv`,["id","gw","event_points","minutes","expected_goals","expected_assists"]), csv(`By Gameweek/GW${gw}/fixtures.csv`,["gameweek","tournament","home_team","away_team","finished"])]);
@@ -38,7 +55,14 @@ for (const gw of done) {
 const fields = {price:"now_cost",points:"total_points",minutes:"minutes",starts:"starts",goals:"goals_scored",assists:"assists",xg:"expected_goals",xa:"expected_assists",xgi:"expected_goal_involvements",cleanSheets:"clean_sheets",defensive:"defensive_contribution",form:"form",ppg:"points_per_game"};
 const players=[];
 for (const [id,p] of playerMap) { const s=statMap.get(id); if (!s) continue; const team=teamMap.get(number(p.team_code,"team code")); if (!team) throw Error(`Unknown team for ${id}`); const values={}; for (const [key,col] of Object.entries(fields)) values[key]=number(s[col],`${id} ${col}`); if (values.price !== null && (values.price < 3 || values.price > 20)) throw Error(`Unexpected price units for ${id}: ${values.price}`); if (values.minutes !== null && values.minutes < 0) throw Error(`Negative minutes for ${id}`);
- players.push({id,name:p.web_name,fullName:`${p.first_name} ${p.second_name}`.trim(),team:team.short_name,teamCode:number(p.team_code,"team"),position:p.position,...values,weeks:done.flatMap(gw=>{const r=weekly.get(gw).get(id); return r ? [{gw,points:number(r.event_points,"points"),minutes:number(r.minutes,"minutes"),xg:number(r.expected_goals,"xg"),xa:number(r.expected_assists,"xa")}] : [];})}); }
+ players.push({id,name:p.web_name,fullName:`${p.first_name} ${p.second_name}`.trim(),team:team.short_name,teamCode:number(p.team_code,"team"),position:p.position,...values,
+  status:s.status||undefined,news:s.news||undefined,
+  chanceNext:number(s.chance_of_playing_next_round,"playing chance"),
+  ownership:number(s.selected_by_percent,"ownership"),
+  transfersIn:number(s.transfers_in_event,"transfers in"),
+  transfersOut:number(s.transfers_out_event,"transfers out"),
+  priceChange:number(s.cost_change_event,"price change"),
+  weeks:done.flatMap(gw=>{const r=weekly.get(gw).get(id); return r ? [{gw,points:number(r.event_points,"points"),minutes:number(r.minutes,"minutes"),xg:number(r.expected_goals,"xg"),xa:number(r.expected_assists,"xa")}] : [];})}); }
 if (players.length < 100 || statMap.size !== players.length) throw Error(`Incomplete identity join: ${players.length}/${statMap.size}`);
 if (snapshotGameweek === done.at(-1)) {
  for (const player of players) {
@@ -48,8 +72,8 @@ if (snapshotGameweek === done.at(-1)) {
  }
 }
 players.sort((a,b)=>a.id-b.id);
-const output={season,snapshotGameweek,sourceCommit:commit,updatedAt:new Date().toISOString(),completedGameweeks:done,nextGameweek:next?number(next.id,"next"):null,deadline:next?.deadline_time||null,players};
+const output={season,snapshotGameweek,sourceCommit:commit,updatedAt:new Date().toISOString(),completedGameweeks:done,nextGameweek:next?number(next.id,"next"):null,deadline:next?.deadline_time||null,fixtures,players};
 await mkdir("public/data",{recursive:true});
 // Do not churn the dataset when the upstream commit is unchanged.
-try { const previous=JSON.parse(await readFile("public/data/season.json","utf8")); if(previous.sourceCommit===commit) { console.log("Already current; preserving original update timestamp"); process.exit(0); } } catch {}
+try { const previous=JSON.parse(await readFile("public/data/season.json","utf8")); if(previous.sourceCommit===commit && JSON.stringify(previous.fixtures)===JSON.stringify(fixtures) && previous.players[0]?.status!==undefined) { console.log("Already current; preserving original update timestamp"); process.exit(0); } } catch {}
 await writeFile("public/data/season.json.tmp",JSON.stringify(output)); await rename("public/data/season.json.tmp","public/data/season.json"); console.log(`Published ${players.length} players from ${commit}`);
