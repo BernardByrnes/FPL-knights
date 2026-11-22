@@ -84,7 +84,8 @@ select{background:#1a222e;border:1px solid #3b4b60;border-radius:5px;padding:9px
  .squad-totals{justify-content:flex-start;text-align:left}
  .pitch{padding:11px 4px}
  .pitch-row,.squad-bench>div{gap:3px}
- .pitch-player strong{font-size:10px}
+ .pitch-row .pitch-player{width:auto;flex:0 1 94px}
+ .pitch-player strong{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
  .pitch-player>span:last-child{font-size:9px}
  .pitch-club{display:none}
  .desk-tools{gap:8px}
