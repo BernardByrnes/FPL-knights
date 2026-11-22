@@ -54,7 +54,7 @@ await checkNoSourceReferences();
 await page.waitForTimeout(200);
 await page.screenshot({path:"artifacts/projections-desktop.png",fullPage:true});
 const forecastRow=page.locator(".projection-row").first();
-const forecastName=await forecastRow.locator(".projection-player>strong").textContent();
+const forecastName=await forecastRow.locator(".projection-player strong").textContent();
 const weekly=await forecastRow.locator(".projection-weeks b").allTextContents();
 const total=Number(await forecastRow.locator(".projection-total b").textContent());
 if(Math.abs(weekly.reduce((sum,v)=>sum+Number(v),0)-total)>.011)throw Error("Five-week forecast total does not match weekly values");
