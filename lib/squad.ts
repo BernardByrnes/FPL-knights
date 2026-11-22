@@ -54,7 +54,10 @@ export async function buildSquad(players: Player[], projection: ProjectionView, 
 
  solver ??= loadHighs();
  const result = (await solver).solve(lp, { time_limit: 5, output_flag: false, mip_rel_gap: 0 });
- const chosen = (column: string) => (result.Columns?.[column]?.Primal ?? 0) > 0.5;
+ const chosen = (column: string) => {
+  const value = result.Columns?.[column];
+  return value != null && "Primal" in value && value.Primal > 0.5;
+ };
  const picked = candidates.filter(p => chosen(`x${p.id}`));
  const picks = picked.map(p => ({ id: p.id, points: p.points, starter: chosen(`s${p.id}`), captain: chosen(`c${p.id}`) }));
  const cost = picked.reduce((total, p) => total + p.price, 0) / 10;
