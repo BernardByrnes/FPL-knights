@@ -25,7 +25,17 @@ for(const category of await page.locator(".category-ranking").all()) {if(await c
 await page.waitForTimeout(350);
 await checkNoSourceReferences();
 await page.screenshot({path:"artifacts/dashboard-desktop.png",fullPage:true});
-await page.getByRole("heading",{name:/projected squad/i}).waitFor();
+await page.locator(".squad-heading").getByRole("heading",{name:`Gameweek ${data.nextGameweek}`,exact:true}).waitFor();
+const trends=page.getByRole("region",{name:"Leading scorers by gameweek"});
+await trends.locator(".recharts-line-curve").last().waitFor();
+if(await trends.locator(".recharts-line-curve").count()!==4) throw Error("Expected four scoring trends");
+await trends.getByLabel("Scoring position",{exact:true}).selectOption("Goalkeeper");
+await trends.locator(".recharts-line-curve").last().waitFor();
+const legend=await trends.locator(".recharts-legend-item-text").allTextContents();
+if(legend.length!==4 || legend.some(label=>!data.players.some(p=>p.position==="Goalkeeper"&&label.startsWith(p.name+" · ")))) {
+ throw Error("Chart position filter did not show four goalkeeper trends");
+}
+await trends.getByLabel("Scoring position",{exact:true}).selectOption("");
 if(await page.locator(".pitch .pitch-player").count()!==11 ||
    await page.locator(".squad-bench .pitch-player").count()!==4 ||
    await page.locator(".pitch-player .kit").count()!==15) throw Error("Expected eleven starters and four bench kits");

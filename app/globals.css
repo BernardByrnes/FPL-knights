@@ -103,3 +103,13 @@ select{background:#1a222e;border:1px solid #3b4b60;border-radius:5px;padding:9px
  .transfer-result>.outline-button{grid-column:1/-1;min-height:44px}
  .projection-weeks span.projection-opponent{white-space:normal}
 }
+
+.squad-heading .squad-gameweek{font-size:clamp(28px,3vw,38px);line-height:1.08;letter-spacing:-.04em}
+.squad-subtitle{font-size:13px;color:var(--muted);margin-top:6px}
+.scoring-trends .panel-head{align-items:flex-start;flex-wrap:wrap;gap:12px}
+.trend-filter{display:grid;gap:4px;color:var(--muted);font-size:11px}
+@media(max-width:700px){
+ .squad-heading .squad-gameweek{font-size:30px}
+ .overview-grid>.scoring-trends .chart{height:275px}
+ .trend-filter select{min-height:44px}
+}

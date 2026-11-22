@@ -40,8 +40,8 @@ export default function GameweekDesk({ squad, projection, players, nextGameweek,
  return <div className="gameweek-desk">
   <section className="panel squad-panel" aria-labelledby="squad-title">
    <div className="squad-heading">
-    <div><span className="kicker">{nextGameweek ? `GAMEWEEK ${nextGameweek}` : "GAMEWEEK PREVIEW"}</span>
-     <h2 id="squad-title">{squad?.optimal ? "Best projected squad" : "Projected squad"}</h2>
+    <div><h2 id="squad-title" className="squad-gameweek">{nextGameweek ? `Gameweek ${nextGameweek}` : "Gameweek preview"}</h2>
+     <p className="squad-subtitle">{squad?.optimal ? "Best projected squad" : "Projected squad"}</p>
     </div>
     {squad && <div className="squad-totals">
      <div><b>{number(squad.points, 2)}</b><small>XI xPts · captain included</small></div>
