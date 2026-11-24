@@ -45,7 +45,7 @@ export default function GameweekDesk({ squad, projection, players, nextGameweek,
     </div>
     {squad && <div className="squad-totals">
      <div><b>{number(squad.points, 2)}</b><small>XI xPts · captain included</small></div>
-     <div><b>{money(squad.cost)}</b><small>15 players · £{squad.budget}m cap</small></div>
+     <div><b>{money(squad.cost)}</b><small>15 players · £{squad.budget}m cap · {money(squad.budget - squad.cost)} left</small></div>
     </div>}
    </div>
    {squad ? <>
@@ -55,7 +55,9 @@ export default function GameweekDesk({ squad, projection, players, nextGameweek,
     <div className="squad-bench"><h3>Bench</h3><div>{bench.map(renderPick)}</div></div>
     <p className="muted squad-note">{rows.slice(1).map(row => row.length).join("–")} formation
      {projection && ` · Forecast updated ${formatEAT(projection.updatedAt)}`}</p>
-   </> : <p className="muted squad-note">A squad will appear once forecasts are available for the next gameweek.</p>}
+   </> : <p className="muted squad-note">{projection
+     ? "A valid squad could not be generated from the current forecast."
+     : "A squad will appear once forecasts are available for the next gameweek."}</p>}
   </section>
   <aside className="desk-tools" aria-label="Gameweek tools">
    <section className="panel desk-tool"><h2>Find a replacement</h2>

@@ -10,5 +10,5 @@ const load=unstable_cache(async(start:number):Promise<Projections>=>{
  const response=await fetch(`https://raw.githubusercontent.com/sertalpbilal/fpl_optimized/${commit.sha}/${path}`,{cache:"no-store",signal:AbortSignal.timeout(15000)});
  if(!response.ok)throw Error("Projection source unavailable");const normalized=parseProjections(await response.text(),start);if(normalized.rows.length<100)throw Error("Incomplete projection source");
  return {...normalized,sourceCommit:commit.sha,sourceUpdatedAt:commit.commit.committer.date,sourceUrl:`https://github.com/sertalpbilal/fpl_optimized/blob/${commit.sha}/${path}`};
-},["fpl-optimized-personal-projections-v1"],{revalidate:43200});
+},["fpl-optimized-personal-projections-v2"],{revalidate:3600});
 export async function loadProjections(start:number|null){if(start==null)return null;try{return await load(start)}catch(error){console.warn("Projections unavailable:",error instanceof Error?error.message:"unknown source error");return null}}

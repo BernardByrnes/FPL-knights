@@ -15,6 +15,7 @@ const errors=[]; page.on("pageerror",e=>errors.push(e.message));
 page.on("console",message=>{if(message.type()==="error" && /hydration|whitespace text nodes|cannot be a child|cannot be a descendant/i.test(message.text())) errors.push(message.text());});
 const response=await page.goto("http://127.0.0.1:3000",{waitUntil:"networkidle"});
 const headers=response.headers();
+if(!headers["cache-control"]?.includes("no-store"))throw Error("The dashboard HTML must not be cached");
 if(await page.evaluate(()=>getComputedStyle(document.documentElement).colorScheme)!=="dark")throw Error("Expected dark theme");
 if(headers["x-content-type-options"]!=="nosniff" || headers["x-frame-options"]!=="DENY") throw Error("Missing browser security headers");
 if(headers["x-powered-by"]) throw Error("Framework identification header should be disabled");
