@@ -45,7 +45,7 @@ export default function GameweekDesk({ squad, projection, players, nextGameweek,
     </div>
     {squad && <div className="squad-totals">
      <div><b>{number(squad.points, 2)}</b><small>XI xPts · captain included</small></div>
-     <div><b>{money(squad.cost)}</b><small>15 players · £101m cap</small></div>
+     <div><b>{money(squad.cost)}</b><small>15 players · £{squad.budget}m cap</small></div>
     </div>}
    </div>
    {squad ? <>

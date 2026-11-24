@@ -40,7 +40,8 @@ if(await page.locator(".pitch .pitch-player").count()!==11 ||
    await page.locator(".squad-bench .pitch-player").count()!==4 ||
    await page.locator(".pitch-player .kit").count()!==15) throw Error("Expected eleven starters and four bench kits");
 const squadCost=Number((await page.locator(".squad-totals b").last().textContent()).replace(/[^0-9.]/g,""));
-if(squadCost>101||squadCost<=0)throw Error("Squad exceeds its £101m budget");
+const squadBudget=Number((await page.locator(".squad-totals small").last().textContent()).match(/£([\d.]+)m cap/)?.[1]);
+if(squadBudget!==106||squadCost>squadBudget||squadCost<=0)throw Error("Squad does not respect the £106m budget");
 await page.getByRole("button",{name:"Open Transfer Finder",exact:true}).click();
 await page.getByLabel("Player to replace").fill("Raya");
 await page.locator(".transfer-panel .search-results button").filter({hasText:/^Raya\s*ARS/}).first().click();

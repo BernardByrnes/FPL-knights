@@ -1,11 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { loadProjections } from "@/lib/load-projections";
 import { unstable_cache } from "next/cache";
-import { buildSquad } from "@/lib/squad";
+import { buildSquad, SQUAD_BUDGET } from "@/lib/squad";
 import Dashboard from "@/components/dashboard";
 import type { Dataset } from "@/lib/types";
 export const revalidate = 300;
-const loadSquad = unstable_cache(buildSquad, ["gw-squad-v1"], { revalidate: 43200 });
+const loadSquad = unstable_cache(buildSquad, ["gw-squad-v1", String(SQUAD_BUDGET)], { revalidate: 43200 });
 export default async function Page(){
  let data: Dataset | null = null;
  try {data=JSON.parse(await readFile(process.cwd()+"/public/data/season.json","utf8"));} catch {}

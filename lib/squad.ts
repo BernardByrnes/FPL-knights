@@ -1,13 +1,13 @@
 import loadHighs from "highs";
 import type { Player, ProjectionView } from "./types";
 
-export const SQUAD_BUDGET = 101;
+export const SQUAD_BUDGET = 106;
 export const positions = ["Goalkeeper", "Defender", "Midfielder", "Forward"] as const;
 const squadCounts = [2, 5, 5, 3];
 const starterMinimums = [1, 3, 2, 1];
 
 export type SquadPick = { id: number; points: number; starter: boolean; captain: boolean };
-export type Squad = { gw: number; picks: SquadPick[]; cost: number; points: number; optimal: boolean };
+export type Squad = { gw: number; picks: SquadPick[]; cost: number; budget: number; points: number; optimal: boolean };
 
 let solver: ReturnType<typeof loadHighs> | undefined;
 const variable = (role: string, id: number) => role + id;
@@ -73,5 +73,5 @@ export async function buildSquad(players: Player[], projection: ProjectionView, 
      picks.filter(p => p.starter && p.captain).length !== 1) return null;
 
  const points = picks.reduce((total, p) => total + (p.starter ? p.points * (p.captain ? 2 : 1) : 0), 0);
- return { gw, picks, cost, points, optimal: result.Status === "Optimal" };
+ return { gw, picks, cost, budget: SQUAD_BUDGET, points, optimal: result.Status === "Optimal" };
 }
