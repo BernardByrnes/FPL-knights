@@ -5,7 +5,9 @@ const config: NextConfig = {
  outputFileTracingIncludes:{"/":["./node_modules/highs/build/*.wasm"]},
  poweredByHeader:false,
  productionBrowserSourceMaps:false,
- async headers(){return [{source:"/:path*",headers:[
+ async headers(){return [
+  {source:"/",headers:[{key:"Netlify-CDN-Cache-Control",value:"no-store"}]},
+  {source:"/:path*",headers:[
   {key:"X-Content-Type-Options",value:"nosniff"},
   {key:"X-Frame-Options",value:"DENY"},
   {key:"Referrer-Policy",value:"strict-origin-when-cross-origin"},
