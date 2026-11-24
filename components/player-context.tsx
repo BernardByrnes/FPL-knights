@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import type { Fixture, Player } from "@/lib/types";
+import { oneBookingFromBan } from "@/lib/discipline";
 
 const shirts: Record<string, [string, string]> = {
  ARS: ["#dc334d", "#f5efe6"], AVL: ["#8b3650", "#abd6ed"], BOU: ["#d53948", "#192331"],
@@ -22,11 +23,20 @@ export function Kit({ player }: { player: Player }) {
 const availability: Record<string, string> = {
  d: "Doubtful", i: "Injured", s: "Suspended", u: "Unavailable", n: "Unavailable",
 };
-export function Availability({ player }: { player: Player }) {
+export function PlayerFlags({ player }: { player: Player }) {
  const label = availability[player.status ?? ""];
- if (!label) return null;
- return <span className="availability" title={player.news || undefined}>
-  {label}{player.chanceNext != null ? ` · ${player.chanceNext}% next GW` : ""}
+ const yellows = player.yellowCards;
+ const atRisk = oneBookingFromBan(yellows, player.clubMatchesPlayed);
+ if (!label && !yellows) return null;
+
+ return <span className="player-flags">
+  {label && <span className={`availability ${player.status === "i" || player.status === "s" ? "availability-out" : ""}`}
+   title={player.news || undefined}>
+   {label}{player.chanceNext != null ? ` · ${player.chanceNext}% next GW` : ""}
+  </span>}
+  {!!yellows && <span className={atRisk ? "booking-risk" : "booking-count"}>
+   {yellows} {yellows === 1 ? "yellow" : "yellows"}{atRisk && " · 1 from ban"}
+  </span>}
  </span>;
 }
 

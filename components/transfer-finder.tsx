@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 import { projectionTotal } from "@/lib/projections";
 import { money, number } from "@/lib/metrics";
 import type { Fixture, Player, ProjectionView } from "@/lib/types";
-import { Availability, fixtureLabel, Kit } from "./player-context";
+import { PlayerFlags, fixtureLabel, Kit } from "./player-context";
 
 export default function TransferFinder({ players, data, fixtures, onCompare }: {
  players: Player[];
@@ -42,7 +42,7 @@ export default function TransferFinder({ players, data, fixtures, onCompare }: {
     <small>{hold ? "Hold current player" : player.team} · {money(player.price)}
      {priceDifference ? ` (${priceDifference > 0 ? "+" : "−"}${money(Math.abs(priceDifference))})` : ""}
      {player.ownership != null && ` · ${number(player.ownership, 1)}% owned`}</small>
-    <Availability player={player}/>
+    <PlayerFlags player={player}/>
    </span></span>
    <span className="transfer-numbers"><strong>{number(points, 2)} xPts</strong><small>{number(minutes, 0)} expected min</small>
     {!hold && gain != null && <b className={gain > 0 ? "gain-positive" : gain < 0 ? "gain-negative" : ""}>
@@ -77,7 +77,7 @@ export default function TransferFinder({ players, data, fixtures, onCompare }: {
    {shortlist.map(player => <button key={player.id} onClick={() => {
     setOutgoingId(player.id);
     if (!budget && player.price != null) setBudget(player.price.toFixed(1));
-   }}><span>{player.name} <small>{player.team} · {player.position}</small></span><b>{money(player.price)}</b></button>)}
+   }}><span>{player.name} <small>{player.team} · {player.position}</small><PlayerFlags player={player}/></span><b>{money(player.price)}</b></button>)}
   </div>}
   {!outgoing && query.trim() && !shortlist.length && <p className="muted">No players match this search.</p>}
   {outgoing && <>

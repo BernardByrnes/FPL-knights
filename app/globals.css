@@ -73,7 +73,11 @@ select{background:#1a222e;border:1px solid #3b4b60;border-radius:5px;padding:9px
 .transfer-numbers .gain-negative{color:#f2a698}
 .transfer-fixtures{display:flex;gap:4px;flex-wrap:wrap}
 .transfer-fixtures small{font-size:10px;padding:4px 5px;background:#253853;border-radius:4px;white-space:nowrap}
-.availability{display:inline-block;color:#edc076;font-size:10px;margin-top:3px}
+.player-flags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.player-flags>span{display:inline-block;font-size:10px;line-height:1.35;padding:2px 5px;border-radius:4px}
+.availability,.booking-risk{color:#edc076;background:#433722}
+.availability.availability-out{color:#f8b4b4;background:#4a292f}
+.booking-count{color:var(--muted);background:#202c3c}
 .projection-weeks span.projection-opponent{font-weight:600;color:#b6d0f7}
 @media(max-width:1050px){
  .gameweek-desk{grid-template-columns:1fr}

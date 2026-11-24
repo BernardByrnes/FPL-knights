@@ -74,6 +74,13 @@ if((await page.locator('tr[data-metric="projectedPoints"] td[data-player-id] spa
 await page.getByRole("button",{name:`Remove ${forecastName}`,exact:true}).click();
 
 await page.getByRole("button",{name:"Player explorer"}).click();
+const injured = data.players.find(p => p.status==="i" && data.players.filter(q=>q.name===p.name).length===1);
+const atRisk = data.players.find(p => p.yellowCards===4 && p.clubMatchesPlayed<19 && data.players.filter(q=>q.name===p.name).length===1);
+if (injured) {
+ await page.getByLabel("Search players",{exact:true}).fill(injured.name);
+ await page.locator(".player-table-row .availability").filter({hasText:/Injured/}).first().waitFor();
+ await page.getByLabel("Search players",{exact:true}).fill("");
+}
 const pagination=page.getByRole("navigation",{name:"Player pagination top",exact:true});
 if(await page.locator(".player-table-row").count()!==25)throw Error("Expected 25 players per page");
 const firstPageName=await page.locator(".player-table-row button").first().textContent();
@@ -98,6 +105,15 @@ await page.getByRole("dialog").getByText(first.fullName).waitFor();
 await page.getByRole("dialog").getByRole("button",{name:"Close"}).click();
 await page.getByRole("button",{name:"Compare players"}).click();
 if(await page.locator(".metric-picker").count()) throw Error("Statistics controls must wait for a player");
+if (injured) {
+ await page.getByLabel("Search players to compare").fill(injured.name);
+ await page.locator(".search-results .availability").filter({hasText:/Injured/}).first().waitFor();
+}
+if (atRisk) {
+ await page.getByLabel("Search players to compare").fill(atRisk.name);
+ await page.locator(".search-results .booking-risk").filter({hasText:"4 yellows · 1 from ban"}).first().waitFor();
+}
+
 for(const p of [first,second]) { await page.getByLabel("Search players to compare").fill(p.name); await page.locator(".search-results button").filter({hasText:p.name}).first().click(); await page.getByText("Choose statistics to compare",{exact:true}).waitFor(); }
 await page.getByRole("heading",{name:"The numbers, side by side"}).waitFor();
 if(await page.locator(".comparison tr").evaluateAll(rows=>rows.some(row=>Array.from(row.childNodes).some(node=>node.nodeType===3)))) throw Error("Comparison rows must not contain whitespace text nodes");
